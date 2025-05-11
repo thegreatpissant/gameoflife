@@ -93,7 +93,7 @@ def interpolate_atoms(atoms: list[Atom.Atom], alpha: float):
 def main():
     window_h: float = 600.0
     window_w: float = 600.0
-    num_atoms: int = 500
+    num_atoms: int = 50
     window_dimensions: tuple[float, float] = (window_w, window_h)
     pygame.init()
     window = pygame.display.set_mode(window_dimensions)
