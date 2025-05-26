@@ -1,26 +1,45 @@
-cmake_minimum_required(VERSION 3.10)
-project(MySDL3Project)
-add_definitions( -std=c++17 )
+cmake_minimum_required(VERSION 3.31)
+project(life)
+
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(SDL3 REQUIRED)
+#find_package(GTest REQUIRED)
+
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+FetchContent_MakeAvailable(googletest)
+
+include_directories(src)
 
 # Create the life library
-set ( ${PROJECT_NAME}_LIFE_HEADERS ./src/life.hpp )
-set ( ${PROJECT_NAME}_LIFE_SOURCE ./src/life.cpp )
+set ( ${PROJECT_NAME}_LIFE_HEADERS ./src/life.hpp ./src/stats.hpp)
+set ( ${PROJECT_NAME}_LIFE_SOURCE ./src/life.cpp ./src/stats.cpp)
 add_library( ${PROJECT_NAME}_LIFE SHARED ${${PROJECT_NAME}_LIFE_HEADERS} ${${PROJECT_NAME}_LIFE_SOURCE})
 
-# Create the atoms library from atoms.cpp
-set ( ${PROJECT_NAME}_ATOMS_SOURCE ./src/libs/atoms.cpp )
-add_library( ${PROJECT_NAME}_ATOMS SHARED ${${PROJECT_NAME}_ATOMS_SOURCE})
+add_executable(
+        ${PROJECT_NAME}
+        src/main.cpp
+)
 
-# MySDL3App
-add_executable(MySDL3App ./src/main.cpp)
-target_link_libraries(MySDL3App LINK_PUBLIC SDL3::SDL3 ${PROJECT_NAME}_LIFE)
-target_include_directories(MySDL3App PUBLIC ${PROJECT_NAME}_LIFE)
+target_link_libraries(life LINK_PUBLIC SDL3::SDL3 ${PROJECT_NAME}_LIFE)
 
 # Testing - LIFE
-include(CTest)
+include(GoogleTest)
 enable_testing()
-add_executable(life_tests ./src/test_life.cpp)
+add_executable(life_tests src/life_test.cpp)
 target_link_libraries(life_tests ${PROJECT_NAME}_LIFE)
 add_test(NAME life_unit_tests COMMAND life_tests)
+add_executable(life_gtests src/life_gtests.cpp)
+target_link_libraries(life_gtests ${PROJECT_NAME}_LIFE GTest::gtest_main)
+gtest_discover_tests(life_gtests)
+
+# Testing - STATS
+include(GoogleTest)
+enable_testing()
+add_executable(stats_tests src/stats_test.cpp)
+target_link_libraries(stats_tests ${PROJECT_NAME}_LIFE GTest::gtest_main)
+gtest_discover_tests(stats_tests)

@@ -4,17 +4,21 @@
 #include "SDL3/SDL_main.h"
 
 #include "life.hpp"
+#include "stats.hpp"
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 
-#define WINDOW_WIDTH 100
-#define WINDOW_HEIGHT 100
+#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 1000
 
 life::Board board;
 
 static Uint64 last_time = 0;
 static SDL_FPoint points[life::LIFE_BOARD_HEIGHT * life::LIFE_BOARD_WIDTH];
+
+// global stats object
+life::stats gameStats;
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
@@ -49,13 +53,26 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 	{
 		return SDL_APP_SUCCESS;
 	}
+	//  print on s key
+	if (event->type == SDL_EVENT_KEY_DOWN)
+	{
+		//  if "S" is pressed execute stats
+		if (event->key.scancode == SDL_SCANCODE_S)
+		{
+			gameStats.print();
+		}
+	}
 	return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppIterate(void *appstate) {
-	const Uint64 start = SDL_GetTicks();
-	const float elapsed = ((float) (start - last_time)) / 1000.0f;
-	
+	// Progress the board forward one step.
+	gameStats.start(life::ITERATE, SDL_GetTicks());
+	life::iterateBoard(board, WINDOW_HEIGHT, WINDOW_WIDTH);
+	gameStats.stop(life::ITERATE, SDL_GetTicks());
+
+	// Render the board.
+	gameStats.start(life::RENDER, SDL_GetTicks());
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
@@ -63,16 +80,19 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 		for (int j = 0; j < WINDOW_WIDTH; j++) {
 			if ( board[i * WINDOW_WIDTH + j] == 1) {
 				SDL_Log("Render point");
-				if (!SDL_RenderPoint(renderer, float(j), float(i))) {
+				if (!SDL_RenderPoint(renderer, static_cast<float>(j), static_cast<float>(i))) {
 					SDL_Log("Could not render point: %s", SDL_GetError());
 					return SDL_APP_FAILURE;
 				}
 			}	
 		}
 	}
-	SDL_RenderPresent(renderer);
+	gameStats.stop(life::RENDER, SDL_GetTicks());
 
-	life::itterateBoard(board, WINDOW_HEIGHT, WINDOW_WIDTH);	
+	gameStats.start(life::PRESENT, SDL_GetTicks());
+	SDL_RenderPresent(renderer);
+	gameStats.stop(life::PRESENT, SDL_GetTicks());
+
 	return SDL_APP_CONTINUE;
 }
 

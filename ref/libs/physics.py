@@ -1,4 +1,5 @@
-from . import atom
+from ref.libs import atom
+
 
 def wrap_around(atom: atom.Atom, bounds: tuple[float, float]):
     if atom.pos_x < 0:

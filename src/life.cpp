@@ -5,26 +5,26 @@
 
 using namespace std;
 namespace life {
-Board genBoard(int height, int width) {
+Board genBoard(const int height, const int width) {
     Board board = Board(height * width);
     for(auto beg = board.begin(); beg != board.end(); beg++) {
         *beg = 0;
     }
     return board;
 }
-int getCellState(Board board, int height, int width, int x, int y) {
+int getCellState(const Board& board, int height, const int width, const int x, const int y) {
     return board[y * width + x];
 }
 
-void setCellState(Board &board, int height, int width, int x, int y, int state) {
+void setCellState(Board &board, int height, const int width, const int x, const int y, int state) {
     board[y * width + x] = state;
 }
 
-int neighborCount(Board board, int height, int width, int x, int y){
-    int start_x = std::max(0, x - 1);
-    int start_y = std::max(0, y - 1);
-    int end_x = std::min(width, x + 2);
-    int end_y = std::min(height, y + 2);
+int neighborCount(const Board& board, const int height, const int width, const int x, const int y){
+    const int start_x = std::max(0, x - 1);
+    const int start_y = std::max(0, y - 1);
+    const int end_x = std::min(width, x + 2);
+    const int end_y = std::min(height, y + 2);
     int count = 0;
     for (int i = start_x; i < end_x; i++) {
         for (int j = start_y; j < end_y; j++) {
@@ -39,7 +39,7 @@ int neighborCount(Board board, int height, int width, int x, int y){
     return count;
 }
 
-void itterateBoard(Board &board, int height, int width) {
+void iterateBoard(Board &board, int height, int width) {
 /*
     Any live cell with fewer than two live neighbours dies, as if by underpopulation.
     Any live cell with two or three live neighbours lives on to the next generation.

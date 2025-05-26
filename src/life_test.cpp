@@ -86,7 +86,7 @@ void TEST_itterate_board() {
     life::setCellState(board, boardHeight, boardWidth, 2, 2, 1);
 
     life::printBoard(board, boardHeight, boardWidth);
-    life::itterateBoard(board, boardHeight, boardWidth);
+    life::iterateBoard(board, boardHeight, boardWidth);
     life::printBoard(board, boardHeight, boardWidth);
     
     life::Board gen2 = {1,1,0, 1,0,0, 1,1,1};
