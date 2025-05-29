@@ -4,7 +4,7 @@
 #include <string>    // For std::string
 #include <memory>    // For std::unique_ptr
 #include "gtest/gtest.h"
-#include "stats.hpp"
+#include "Stats.hpp"
 
 // Helper class to redirect std::cout to a std::stringstream
 class CoutRedirector {
@@ -27,7 +27,7 @@ private:
 // Test fixture for the stats class
 class StatsTest : public ::testing::Test {
 protected:
-    life::stats s; // Instance of the class under test
+    life::Stats s; // Instance of the class under test
     std::stringstream captured_cout_stream; // Stream to capture cout
     std::unique_ptr<CoutRedirector> cout_redirector_ptr; // RAII redirector
 

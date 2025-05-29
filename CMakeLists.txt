@@ -16,8 +16,8 @@ FetchContent_MakeAvailable(googletest)
 include_directories(src)
 
 # Create the life library
-set ( ${PROJECT_NAME}_LIFE_HEADERS ./src/life.hpp ./src/stats.hpp)
-set ( ${PROJECT_NAME}_LIFE_SOURCE ./src/life.cpp ./src/stats.cpp)
+set ( ${PROJECT_NAME}_LIFE_HEADERS ./src/life.hpp src/Stats.hpp)
+set ( ${PROJECT_NAME}_LIFE_SOURCE ./src/life.cpp src/Stats.cpp)
 add_library( ${PROJECT_NAME}_LIFE SHARED ${${PROJECT_NAME}_LIFE_HEADERS} ${${PROJECT_NAME}_LIFE_SOURCE})
 
 add_executable(

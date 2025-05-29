@@ -16,7 +16,7 @@ constexpr std::string_view RENDER = "Render";
 constexpr std::string_view PRESENT = "Present";
 constexpr std::string_view CALL = "Call";
 
-class stats {
+class Stats {
 private:
         struct stat {
                 Uint64 start = 0;
@@ -27,7 +27,7 @@ private:
 public:
         void start(const std::string_view& name, Uint64 time);
         void stop(const std::string_view& name, Uint64 time);
-        void print(std::ostream& out = std::cout);
+        void print(std::ostream& out = std::cout) const;
 };
 
 }

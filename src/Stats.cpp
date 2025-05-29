@@ -1,21 +1,21 @@
 // stats.cpp
-#include "stats.hpp"
+#include "Stats.hpp"
 #include <iostream>
 
 namespace life {
 
-void stats::start(const std::string_view& name, Uint64 time) {
+void Stats::start(const std::string_view& name, const Uint64 time) {
     counters[name].start = time;
 }
 
-void stats::stop(const std::string_view& name, Uint64 time) {
+void Stats::stop(const std::string_view& name, const Uint64 time) {
     counters[name].stop = time;
 }
 
 // A basic print implementation for testing purposes.
 // This version directly calculates stop - start.
 // If start > stop (e.g., stop not called, so stop=0), Uint64 will underflow.
-void stats::print(std::ostream& out) {
+void Stats::print(std::ostream& out) const {
     out << "Statistics:" << std::endl;
     if (counters.empty()) {
         // Optionally, print a message if no stats, or just the header.
