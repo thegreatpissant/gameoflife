@@ -54,7 +54,7 @@ protected:
 // Test case: Printing when no statistics have been recorded
 TEST_F(StatsTest, Print_NoStats) {
     s.print();
-    std::string output = getCapturedOutput();
+    const std::string output = getCapturedOutput();
     // Based on the assumed print(), if counters is empty, it prints "Statistics:\n" and returns.
     EXPECT_EQ(output, "Statistics:\n");
 }

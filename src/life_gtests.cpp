@@ -25,14 +25,14 @@ TEST(LifeGameTests, SingleNeighborCount) {
 }
 
 TEST(LifeGameTests, MultiNeighborCount) {
-    const int boardWidth = 3, boardHeight = 3;
+    constexpr int boardWidth = 3, boardHeight = 3;
     // It's good practice to generate the board with the dimensions you intend to test
     life::Board board = life::genBoard(boardHeight, boardWidth); 
     life::setCellState(board, boardHeight, boardWidth, 0, 0, 1 );
     life::setCellState(board, boardHeight, boardWidth, 1, 0, 1 );
     life::setCellState(board, boardHeight, boardWidth, 0, 1, 1 );
     // The original test counts neighbors for (0,0). The neighbors are (1,0) and (0,1).
-    int count = life::neighborCount(board, boardHeight, boardWidth, 0, 0);
+    const int count = life::neighborCount(board, boardHeight, boardWidth, 0, 0);
     EXPECT_EQ(count, 2);
 }
 
@@ -69,7 +69,7 @@ TEST(LifeGameTests, SetCellState) {
 }
 
 TEST(LifeGameTests, IterateBoard) {
-    const int boardWidth = 3, boardHeight = 3;
+    constexpr int boardWidth = 3, boardHeight = 3;
     life::Board board = life::genBoard(boardHeight, boardWidth);
 
     // Initial state (a small "blinker" precursor that will form a line)
@@ -107,8 +107,8 @@ TEST(LifeGameTests, IterateBoard) {
 
     // std::cout << "Board after iteration:" << std::endl;
     // life::printBoard(board, boardHeight, boardWidth);
-    
-    life::Board expected_gen2 = {1,1,0, 1,0,0, 1,1,1}; // As per original test's assertion
+
+    const life::Board expected_gen2 = {1,1,0, 1,0,0, 1,1,1}; // As per original test's assertion
     
     // Gtest can compare vectors directly
     EXPECT_EQ(board, expected_gen2);
