@@ -6,8 +6,8 @@
 #include "life.hpp"
 #include "Stats.hpp"
 
-#define WINDOW_WIDTH 100
-#define WINDOW_HEIGHT 100
+#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 1000
 
 life::Board board;
 
@@ -43,12 +43,12 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 	}
 
 	board = life::genBoard(WINDOW_HEIGHT, WINDOW_WIDTH);
-    life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 0, WINDOW_HEIGHT / 2 + 0, 1);
-    life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 0, 1);
-    life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 0, WINDOW_HEIGHT / 2 + 1, 1);
-    life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 1, 1);
-    life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 2, 1);
-    life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 2, WINDOW_HEIGHT / 2 + 2, 1);
+	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 0, WINDOW_HEIGHT / 2 + 0, life::ALIVE);
+	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 0, life::ALIVE);
+	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 0, WINDOW_HEIGHT / 2 + 1, life::ALIVE);
+	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 1, life::ALIVE);
+	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 2, life::ALIVE);
+	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 2, WINDOW_HEIGHT / 2 + 2, life::ALIVE);
 	appState->lastTime = SDL_GetTicks();
 
 	SDL_Log("App initialized");
@@ -70,6 +70,10 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 		if (event->key.scancode == SDL_SCANCODE_S)
 		{
 			appStats.print();
+		}
+		if (event->key.scancode == SDL_SCANCODE_Q)
+		{
+			return SDL_APP_SUCCESS;
 		}
 	}
 	return SDL_APP_CONTINUE;

@@ -4,6 +4,9 @@
 namespace life {
     constexpr int LIFE_BOARD_WIDTH = 100;
     constexpr int LIFE_BOARD_HEIGHT = 100;
+
+    constexpr int DEAD = 0;
+    constexpr int ALIVE = 1;
     
     using Board = std::vector<int>;
     

@@ -7,20 +7,47 @@ using namespace std;
 namespace life {
 Board genBoard(const int height, const int width) {
     Board board = Board(height * width);
-    for(auto beg = board.begin(); beg != board.end(); beg++) {
-        *beg = 0;
+    for(auto cell = board.begin(); cell != board.end(); cell++) {
+        *cell = 0;
     }
     return board;
 }
-int getCellState(const Board& board, int height, const int width, const int x, const int y) {
-    return board[y * width + x];
+int getCellState_bin(const Board& board, int height, const int width, const int x, const int y) {
+    return ((board[y * width + x] << 30) >> 30);
 }
 
+int getCellState(const Board& board, int height, const int width, const int x, const int y) {
+	return getCellState_bin(board, height, width, x, y);
+    return board[y * width + x]; 
+}
+
+void setCellState_bin(Board &board, int height, const int width, const int x, const int y, int state) {
+	const int start_x = std::max(0, x - 1);
+	const int start_y = std::max(0, y - 1);
+	const int end_x = std::min(width, x + 2);
+	const int end_y = std::min(height, y + 2);
+	int count = 0;
+	for (int i = start_x; i < end_x; i++) {
+		for (int j = start_y; j < end_y; j++) {
+			if (i == x && j == y) {
+				board[j * width + i] = ((board[j * width + i] >> 2) << 2) + state;
+			} else {
+				board[j * width + i] = (((board[j * width + i] >> 2) + state) << 2) | ((board[j * width + i] << 30) >> 30);
+			}
+		}
+	}
+}
 void setCellState(Board &board, int height, const int width, const int x, const int y, int state) {
+	return setCellState_bin(board, height, width, x, y, state);
     board[y * width + x] = state;
 }
 
+int neighborCount_bin(const Board& board, const int height, const int width, const int x, const int y){
+	return board[y * width + x] >> 2;
+}
+
 int neighborCount(const Board& board, const int height, const int width, const int x, const int y){
+	return neighborCount_bin(board, height, width, x, y);
     const int start_x = std::max(0, x - 1);
     const int start_y = std::max(0, y - 1);
     const int end_x = std::min(width, x + 2);
@@ -51,15 +78,15 @@ void iterateBoard(Board &board, int height, int width) {
         for (int j = 0; j < width; j++) {
             int count = neighborCount(board, height, width, j, i);
             int cellState = getCellState(board, height, width, j, i);
-            if (cellState == 1) {
+            if (cellState == life::ALIVE) {
                 if (count < 2 || count > 3) {
-                    setCellState(newBoard, height, width, j, i, 0);
+                    setCellState(newBoard, height, width, j, i, life::DEAD);
                 } else {
-                    setCellState(newBoard, height, width, j, i, 1);
+                    setCellState(newBoard, height, width, j, i, life::ALIVE);
                 }
             } else {
                 if (count == 3) {
-                    setCellState(newBoard, height, width, j, i, 1);
+                    setCellState(newBoard, height, width, j, i, life::ALIVE);
                 }
             }
         }
