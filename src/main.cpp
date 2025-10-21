@@ -9,6 +9,8 @@
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 1000
 
+#define BOARD_WIDTH 250
+#define BOARD_HEIGHT 250
 life::Board board;
 
 typedef struct {
@@ -16,12 +18,23 @@ typedef struct {
 	SDL_Renderer *renderer{};
 	life::Stats appStats{};
 	Uint64 lastTime = 0;
+	struct Mouse {
+		bool down = false;
+		int x = 0;
+		int y = 0;
+		int clickX = 0;
+		int clickY = 0;
+	} ;
+	Mouse mouse;
+	bool simulationPaused = false;
+	//int boardWidth = BOARD_WIDTH;
+	//int boardHeight = BOARD_HEIGHT;
+	int boardWidth = WINDOW_WIDTH;
+	int boardHeight = WINDOW_HEIGHT;
 } AppState;
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
-	SDL_Log("width:%d, height:%d", WINDOW_WIDTH, WINDOW_HEIGHT);
-
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
 		SDL_Log("Could not initialize SDL: %s", SDL_GetError());
@@ -42,13 +55,13 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 		return SDL_APP_FAILURE;
 	}
 
-	board = life::genBoard(WINDOW_HEIGHT, WINDOW_WIDTH);
-	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 0, WINDOW_HEIGHT / 2 + 0, life::ALIVE);
-	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 0, life::ALIVE);
-	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 0, WINDOW_HEIGHT / 2 + 1, life::ALIVE);
-	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 1, life::ALIVE);
-	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2 + 2, life::ALIVE);
-	life::setCellState(board, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_WIDTH / 2 + 2, WINDOW_HEIGHT / 2 + 2, life::ALIVE);
+	board = life::genBoard(appState->boardHeight, appState->boardWidth);
+	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 0, appState->boardHeight / 2 + 0, life::ALIVE);
+	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 1, appState->boardHeight / 2 + 0, life::ALIVE);
+	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 0, appState->boardHeight / 2 + 1, life::ALIVE);
+	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 1, appState->boardHeight / 2 + 1, life::ALIVE);
+	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 1, appState->boardHeight / 2 + 2, life::ALIVE);
+	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 2, appState->boardHeight / 2 + 2, life::ALIVE);
 	appState->lastTime = SDL_GetTicks();
 
 	SDL_Log("App initialized");
@@ -56,8 +69,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 }
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
-	auto *app_state = static_cast<AppState *>(appstate);
-	auto &appStats = app_state->appStats;
+	auto *appState = static_cast<AppState *>(appstate);
+	auto &appStats = appState->appStats;
 
 	if (event->type == SDL_EVENT_QUIT) 
 	{
@@ -76,16 +89,41 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 			return SDL_APP_SUCCESS;
 		}
 	}
+	if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+		appState->mouse.down = true;
+		appState->mouse.clickX = event->button.x;
+		appState->mouse.clickY = event->button.y;
+		appState->simulationPaused = true;
+	}
+	if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
+		appState->mouse.down = false;
+		appState->simulationPaused = false;
+	}
+	if (event->type = SDL_EVENT_MOUSE_MOTION) {
+		appState->mouse.x = event->button.x;
+		appState->mouse.y = event->button.y;
+	}
+
+	if(appState->mouse.down) {
+		std::cout << "Mouse Button Down:" << std::endl;
+		std::cout << "clickX: " << appState->mouse.clickX << "clickY:" << appState->mouse.clickY << std::endl;
+		std::cout << "x: " << appState->mouse.x<< "y:" << appState->mouse.y << std::endl;
+		life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->mouse.x, appState->mouse.y, life::ALIVE);
+
+	}
 	return SDL_APP_CONTINUE;
 }
 
 SDL_AppResult SDL_AppIterate(void *appstate) {
 	auto *appState = static_cast<AppState*>(appstate);
 	auto *appStats = &appState->appStats;
+	int cellScale = 1;
 
 	// Progress the board forward one step.
 	appStats->start(life::ITERATE, SDL_GetTicks());
-	life::iterateBoard(board, WINDOW_HEIGHT, WINDOW_WIDTH);
+	if (!appState->simulationPaused) {
+		life::iterateBoard(board, appState->boardHeight, appState->boardWidth);
+	}
 	appStats->stop(life::ITERATE, SDL_GetTicks());
 
 	// Render the board.
@@ -93,10 +131,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 	SDL_SetRenderDrawColor(appState->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(appState->renderer);
 	SDL_SetRenderDrawColor(appState->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-	for (int i = 0; i < WINDOW_HEIGHT; i++) {
-		for (int j = 0; j < WINDOW_WIDTH; j++) {
-			if ( board[i * WINDOW_WIDTH + j] == 1) {
-				SDL_Log("Render point");
+	int cellWidth = WINDOW_WIDTH / appState->boardWidth;
+	int cellHeight = WINDOW_HEIGHT / appState->boardHeight;
+	for (int i = 0; i < appState->boardHeight; i++) {
+		for (int j = 0; j < appState->boardWidth; j++) {
+			if ( life::getCellState(board, appState->boardHeight, appState->boardWidth, j, i) == life::ALIVE) {
 				if (!SDL_RenderPoint(appState->renderer, static_cast<float>(j), static_cast<float>(i))) {
 					SDL_Log("Could not render point: %s", SDL_GetError());
 					return SDL_APP_FAILURE;
@@ -115,9 +154,9 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 
 void SDL_AppQuit(void *appstate, SDL_AppResult result) {
 	if (appstate != nullptr) {
-		auto *app_state = static_cast<AppState*>(appstate);
-		SDL_DestroyRenderer(app_state->renderer);
-		SDL_DestroyWindow(app_state->window);
-		delete app_state;
+		auto *appState = static_cast<AppState*>(appstate);
+		SDL_DestroyRenderer(appState->renderer);
+		SDL_DestroyWindow(appState->window);
+		delete appState;
 	}
 }
