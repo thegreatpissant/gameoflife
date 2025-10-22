@@ -12,16 +12,16 @@ Board genBoard(const int height, const int width) {
     }
     return board;
 }
-int getCellState_bin(const Board& board, int height, const int width, const int x, const int y) {
-    return ((board[y * width + x] << 30) >> 30);
+char getCellState_bin(const Board& board, int height, const int width, const int x, const int y) {
+    return board[y * width + x] & 0x01;
 }
 
-int getCellState(const Board& board, int height, const int width, const int x, const int y) {
+char getCellState(const Board& board, int height, const int width, const int x, const int y) {
 	return getCellState_bin(board, height, width, x, y);
     return board[y * width + x]; 
 }
 
-void setCellState_bin(Board &board, int height, const int width, const int x, const int y, int state) {
+void setCellState_bin(Board &board, int height, const int width, const int x, const int y, char state) {
 	const int start_x = std::max(0, x - 1);
 	const int start_y = std::max(0, y - 1);
 	const int end_x = std::min(width, x + 2);
@@ -30,20 +30,20 @@ void setCellState_bin(Board &board, int height, const int width, const int x, co
 	for (int i = start_x; i < end_x; i++) {
 		for (int j = start_y; j < end_y; j++) {
 			if (i == x && j == y) {
-				board[j * width + i] = ((board[j * width + i] >> 2) << 2) + state;
+				board[j * width + i] = board[j * width + i] | state;
 			} else {
-				board[j * width + i] = (((board[j * width + i] >> 2) + state) << 2) | ((board[j * width + i] << 30) >> 30);
+				board[j * width + i] = (((board[j * width + i] >> 1) + state) << 1) | (board[j * width + i] & 0x01);
 			}
 		}
 	}
 }
-void setCellState(Board &board, int height, const int width, const int x, const int y, int state) {
+void setCellState(Board &board, int height, const int width, const int x, const int y, char state) {
 	return setCellState_bin(board, height, width, x, y, state);
     board[y * width + x] = state;
 }
 
 int neighborCount_bin(const Board& board, const int height, const int width, const int x, const int y){
-	return board[y * width + x] >> 2;
+	return board[y * width + x] >> 1;
 }
 
 int neighborCount(const Board& board, const int height, const int width, const int x, const int y){
