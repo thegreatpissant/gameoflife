@@ -29,7 +29,20 @@ typedef struct {
 	bool simulationPaused = false;
 	int boardWidth = INITIAL_BOARD_WIDTH;
 	int boardHeight = INITIAL_BOARD_HEIGHT;
+	bool vsyncState = true;
 } AppState;
+
+bool setVSync(AppState *appState) {
+	if(appState->vsyncState && !SDL_SetRenderVSync(appState->renderer, 1)) {
+		SDL_Log("Could not enable VSync: %s", SDL_GetError());
+		return false;
+	}
+	if(!appState->vsyncState && !SDL_SetRenderVSync(appState->renderer, 0)) {
+		SDL_Log("Could not disable VSync: %s", SDL_GetError());
+		return false;
+	}
+	return true;
+}
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 {
@@ -52,6 +65,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
 		SDL_Log("Could not create window: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
+
+	setVSync(appState);
 
 	board = life::genBoard(appState->boardHeight, appState->boardWidth);
 	life::setCellState(board, appState->boardHeight, appState->boardWidth, appState->boardWidth / 2 + 0, appState->boardHeight / 2 + 0, life::ALIVE);
@@ -86,6 +101,15 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 		{
 			return SDL_APP_SUCCESS;
 		}
+		if (event->key.scancode == SDL_SCANCODE_V)
+		{
+			appState->vsyncState = !appState->vsyncState;
+			if (!setVSync(appState)) {
+				appState->vsyncState = !appState->vsyncState;
+			}
+			std::cout << "VSync: " << (appState->vsyncState ? "on" : "off") << std::endl;
+		}
+
 	}
 	if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
 		appState->mouse.down = true;
@@ -136,8 +160,9 @@ bool renderCell(SDL_Renderer *renderer, float cellSize, int x, int y){
 	}
 	return true;
 }
-
 SDL_AppResult SDL_AppIterate(void *appstate) {
+	static Uint64 ticks = 0;
+	static Uint64 lastFrameRate = 0;
 	auto *appState = static_cast<AppState*>(appstate);
 	auto *appStats = &appState->appStats;
 
@@ -170,7 +195,10 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
 	appStats->start(life::PRESENT, SDL_GetTicks());
 	SDL_RenderPresent(appState->renderer);
 	appStats->stop(life::PRESENT, SDL_GetTicks());
-
+	Uint64 postframe = SDL_GetTicksNS();
+	Uint64 rate = SDL_NS_PER_SECOND / (postframe - ticks);
+	appStats->set(life::FRAMERATE, rate);
+	ticks = postframe;
 	return SDL_APP_CONTINUE;
 }
 
