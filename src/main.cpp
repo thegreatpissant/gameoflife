@@ -9,8 +9,8 @@
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 1000
 
-#define INITIAL_BOARD_WIDTH 250
-#define INITIAL_BOARD_HEIGHT 250
+#define INITIAL_BOARD_WIDTH 500
+#define INITIAL_BOARD_HEIGHT 500
 life::Board board;
 
 typedef struct {
@@ -46,6 +46,18 @@ bool setVSync(AppState *appState) {
   return true;
 }
 
+void zapBoard(AppState *appState){
+  // Init the board state with random cells
+  for (int y = 0; y < appState->boardHeight; y++) {
+    for (int x = 0; x < appState->boardWidth; x++) {
+      if (rand() % 2) {
+        life::setCellState(board, appState->boardHeight, appState->boardWidth,
+                           x, y, life::ALIVE);
+      }
+    }
+  }
+}
+
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Could not initialize SDL: %s", SDL_GetError());
@@ -69,24 +81,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
   setVSync(appState);
 
   board = life::genBoard(appState->boardHeight, appState->boardWidth);
-  life::setCellState(board, appState->boardHeight, appState->boardWidth,
-                     appState->boardWidth / 2 + 0,
-                     appState->boardHeight / 2 + 0, life::ALIVE);
-  life::setCellState(board, appState->boardHeight, appState->boardWidth,
-                     appState->boardWidth / 2 + 1,
-                     appState->boardHeight / 2 + 0, life::ALIVE);
-  life::setCellState(board, appState->boardHeight, appState->boardWidth,
-                     appState->boardWidth / 2 + 0,
-                     appState->boardHeight / 2 + 1, life::ALIVE);
-  life::setCellState(board, appState->boardHeight, appState->boardWidth,
-                     appState->boardWidth / 2 + 1,
-                     appState->boardHeight / 2 + 1, life::ALIVE);
-  life::setCellState(board, appState->boardHeight, appState->boardWidth,
-                     appState->boardWidth / 2 + 1,
-                     appState->boardHeight / 2 + 2, life::ALIVE);
-  life::setCellState(board, appState->boardHeight, appState->boardWidth,
-                     appState->boardWidth / 2 + 2,
-                     appState->boardHeight / 2 + 2, life::ALIVE);
   appState->lastTime = SDL_GetTicks();
 
   SDL_Log("App initialized");
@@ -106,7 +100,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     if (event->key.scancode == SDL_SCANCODE_S) {
       appStats.print();
     }
-    if (event->key.scancode == SDL_SCANCODE_Q) {
+    if (event->key.scancode == SDL_SCANCODE_Q ||
+        event->key.scancode == SDL_SCANCODE_ESCAPE) {
       return SDL_APP_SUCCESS;
     }
     if (event->key.scancode == SDL_SCANCODE_V) {
@@ -116,6 +111,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       }
       std::cout << "VSync: " << (appState->vsyncState ? "on" : "off")
                 << std::endl;
+    }
+    if (event->key.scancode == SDL_SCANCODE_Z) {
+      zapBoard(appState);
     }
   }
   if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
