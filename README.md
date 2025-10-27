@@ -8,3 +8,9 @@ Game of life c++ version
 - 'q' - quit
 - 'space' - start/stop simulation
 - 'mouse click' - set cell as alive
+
+```
+cmake -S . -B build
+cmake --build build
+./build/life
+```
