@@ -1,5 +1,7 @@
 Game of life c++ version
 
+Did my own implementation then I stumbled upon [Abrash's book](https://www.jagregory.com/abrash-black-book/#chapter-17-the-game-of-life)
+
 - 'a' - render using alive cell determiniation
 - 'v' - toggle vsync 
 - 's' - print out stats of main loop
@@ -8,6 +10,8 @@ Game of life c++ version
 - 'q' - quit
 - 'space' - start/stop simulation
 - 'mouse click' - set cell as alive
+
+Requires SDL3
 
 ```
 cmake -S . -B build
