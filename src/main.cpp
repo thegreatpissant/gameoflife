@@ -32,6 +32,7 @@ typedef struct {
   int boardWidth = INITIAL_BOARD_WIDTH;
   int boardHeight = INITIAL_BOARD_HEIGHT;
   bool vsyncState = true;
+  bool rederAliveList = false;
 } AppState;
 
 bool setVSync(AppState *appState) {
@@ -46,14 +47,21 @@ bool setVSync(AppState *appState) {
   return true;
 }
 
-void zapBoard(AppState *appState){
+void zapBoard(AppState *appState) {
   // Init the board state with random cells
   for (int y = 0; y < appState->boardHeight; y++) {
     for (int x = 0; x < appState->boardWidth; x++) {
       if (rand() % 2) {
-        life::setCellState(gameBoard, 
-                           x, y, life::ALIVE);
+        life::setCellState(gameBoard, x, y, life::ALIVE);
       }
+    }
+  }
+}
+
+void stippleBoard(AppState *appState){
+  for (int y = 0; y < appState->boardWidth; y++) {
+    for (int x = 0; x < appState->boardHeight; x++) {
+      life::setCellState(gameBoard, x, y, ((x + (y % 2)) % 2 == 1)? life::ALIVE : life::DEAD);
     }
   }
 }
@@ -104,6 +112,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
         event->key.scancode == SDL_SCANCODE_ESCAPE) {
       return SDL_APP_SUCCESS;
     }
+    if (event->key.scancode == SDL_SCANCODE_A) {
+      appState->rederAliveList = !appState->rederAliveList;
+    }
     if (event->key.scancode == SDL_SCANCODE_V) {
       appState->vsyncState = !appState->vsyncState;
       if (!setVSync(appState)) {
@@ -115,6 +126,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     if (event->key.scancode == SDL_SCANCODE_Z) {
       zapBoard(appState);
     }
+    if (event->key.scancode == SDL_SCANCODE_X) {
+      gameBoard = life::genBoard(appState->boardHeight, appState->boardWidth);
+      stippleBoard(appState);
+    }
+    if (event->key.scancode == SDL_SCANCODE_SPACE)
+      appState->simulationPaused = !appState->simulationPaused;
   }
   if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
     appState->mouse.down = true;
@@ -140,8 +157,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
               << "clickY:" << appState->mouse.clickY << std::endl;
     std::cout << "x: " << appState->mouse.x << "y:" << appState->mouse.y
               << std::endl;
-    life::setCellState(gameBoard,
-                       appState->mouse.x / cellWidth,
+    life::setCellState(gameBoard, appState->mouse.x / cellWidth,
                        appState->mouse.y / cellHeight, life::ALIVE);
   }
   return SDL_APP_CONTINUE;
@@ -190,13 +206,23 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   SDL_SetRenderDrawColor(appState->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
   int cellWidth = WINDOW_WIDTH / appState->boardWidth;
   int cellHeight = WINDOW_HEIGHT / appState->boardHeight;
-  for (int y = 0; y < appState->boardHeight; y++) {
-    for (int x = 0; x < appState->boardWidth; x++) {
-      if (life::getCellState(gameBoard, x, y) == life::ALIVE) {
-        if (!renderCell(appState->renderer, cellWidth, x * cellWidth,
-                        y * cellWidth)) {
-          SDL_Log("Could not render point: %s", SDL_GetError());
-          return SDL_APP_FAILURE;
+  if (appState->rederAliveList) {
+    for (auto &cell : gameBoard.aliveList) {
+      if (!renderCell(appState->renderer, cellWidth, cell.first * cellWidth,
+                      cell.second * cellWidth)) {
+        SDL_Log("Could not render point: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+      }
+    }
+  } else {
+    for (int y = 0; y < appState->boardHeight; y++) {
+      for (int x = 0; x < appState->boardWidth; x++) {
+        if (life::getCellState(gameBoard, x, y) == life::ALIVE) {
+          if (!renderCell(appState->renderer, cellWidth, x * cellWidth,
+                          y * cellWidth)) {
+            SDL_Log("Could not render point: %s", SDL_GetError());
+            return SDL_APP_FAILURE;
+          }
         }
       }
     }
