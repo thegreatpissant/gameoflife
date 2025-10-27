@@ -1,7 +1,9 @@
-Example life simulation
+Game of life c++ version
 
-Started from [here](https://github.com/hunar4321/particle-life/blob/main/particle_life.py)
-
-Add Game of Life c++ version
-test cases
-Added first stage of Abrash's suggested improvements
+- 'a' - render using alive cell determiniation
+- 's' - print out stats of main loop
+- 'z' - randomly populate alive cells
+- 'x' - create a grid of alive cells
+- 'q' - quit
+- 'space' - pause simulation
+- 'mouse click' - set cell as alive
