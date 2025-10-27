@@ -15,17 +15,15 @@ TEST(LifeGameTests, CreateBoard) {
 
 TEST(LifeGameTests, NoNeighborCount) {
   life::GameBoard gameBoard = life::genBoard();
-  int count = life::neighborCount(gameBoard, life::LIFE_BOARD_HEIGHT,
-                                  life::LIFE_BOARD_WIDTH, 0, 0);
+  int count = life::neighborCount(gameBoard, 0, 0);
   EXPECT_EQ(0, count);
 }
 
 TEST(LifeGameTests, SingleNeighborCount) {
 life::GameBoard gameBoard = life::genBoard();
-life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 0, 0,
+life::setCellState(gameBoard, 0, 0,
                    life::ALIVE);
-int count = life::neighborCount(gameBoard, life::LIFE_BOARD_HEIGHT,
-                                life::LIFE_BOARD_WIDTH, 1, 1);
+int count = life::neighborCount(gameBoard,1, 1);
 EXPECT_EQ(1, count);
 }
 
@@ -34,63 +32,56 @@ TEST(LifeGameTests, MultiNeighborCount) {
   // It's good practice to generate the board with the dimensions you intend to
   // test
   life::GameBoard gameBoard = life::genBoard(boardHeight, boardWidth);
-  life::setCellState(gameBoard, boardHeight, boardWidth, 0, 0, life::ALIVE);
-  life::setCellState(gameBoard, boardHeight, boardWidth, 1, 0, life::ALIVE);
-  life::setCellState(gameBoard, boardHeight, boardWidth, 0, 1, life::ALIVE);
+  life::setCellState(gameBoard, 0, 0, life::ALIVE);
+  life::setCellState(gameBoard, 1, 0, life::ALIVE);
+  life::setCellState(gameBoard, 0, 1, life::ALIVE);
   // The original test counts neighbors for (0,0). The neighbors are (1,0) and
   // (0,1).
-  const int count = life::neighborCount(gameBoard, boardHeight, boardWidth, 0, 0);
+  const int count = life::neighborCount(gameBoard, 0, 0);
   EXPECT_EQ(2, count);
 }
 
 TEST(LifeGameTests, GetCellState) {
   life::GameBoard gameBoard = life::genBoard();
-  life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 0,
+  life::setCellState(gameBoard,  0,
                      0, life::ALIVE);
-  int state = life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                                 life::LIFE_BOARD_WIDTH, 0, 0);
+  int state = life::getCellState(gameBoard, 0, 0);
   EXPECT_EQ(state, life::ALIVE);
 
-  life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 1,
+  life::setCellState(gameBoard, 1,
                      0, life::ALIVE);
-  state = life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                             life::LIFE_BOARD_WIDTH, 0, 0);
+  state = life::getCellState(gameBoard, 0, 0);
   EXPECT_EQ(state, life::ALIVE);
 
-  state = life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                             life::LIFE_BOARD_WIDTH, 1, 0);
+  state = life::getCellState(gameBoard, 1, 0);
   EXPECT_EQ(state, life::ALIVE);
 
-  life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 2,
+  life::setCellState(gameBoard, 2,
                      0, life::ALIVE);
-  state = life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                             life::LIFE_BOARD_WIDTH, 2, 0);
+  state = life::getCellState(gameBoard, 2, 0);
   EXPECT_EQ(state, life::ALIVE);
 }
 
 TEST(LifeGameTests, SetCellState) {
   life::GameBoard gameBoard = life::genBoard();
 
-  life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 0,
+  life::setCellState(gameBoard, 0,
                      0, life::ALIVE);
   // Assuming getCellState is reliable, or directly check board if its structure
   // is known For a std::vector<int> board[y * width + x]
-  EXPECT_EQ(life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                               life::LIFE_BOARD_WIDTH, 0, 0),
+  EXPECT_EQ(life::getCellState(gameBoard,0, 0),
             1);
 
-  life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 1,
+  life::setCellState(gameBoard, 1,
                      0, life::ALIVE);
-  EXPECT_EQ(life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                               life::LIFE_BOARD_WIDTH, 1, 0),
+  EXPECT_EQ(life::getCellState(gameBoard, 1, 0),
             1); // (row 0, col 1)
 
-  life::setCellState(gameBoard, life::LIFE_BOARD_HEIGHT, life::LIFE_BOARD_WIDTH, 0,
+  life::setCellState(gameBoard, 0,
                      2, life::ALIVE);
   // Original test: int index = life::LIFE_BOARD_WIDTH * 2 + 0; (row 2, col 0)
   // This should be (row y=2, col x=0)
-  EXPECT_EQ(life::getCellState(gameBoard, life::LIFE_BOARD_HEIGHT,
-                               life::LIFE_BOARD_WIDTH, 0, 2),
+  EXPECT_EQ(life::getCellState(gameBoard, 0, 2),
             1); // (row 2, col 0)
 }
 
@@ -122,7 +113,7 @@ TEST(LifeGameTests, IterateBoard) {
     auto cell = board_template.begin();
     for (int y = 0; y < boardHeight; y++) {
       for (int x = 0; x < boardWidth; x++) {
-        life::setCellState(gameBoard, boardHeight, boardWidth, x, y, *cell);
+        life::setCellState(gameBoard, x, y, *cell);
         cell++;
       }
     }
@@ -132,7 +123,7 @@ TEST(LifeGameTests, IterateBoard) {
   // std::cout << "Board before iteration:" << std::endl;
   // life::printBoard(board, boardHeight, boardWidth);
 
-  life::iterateBoard(gameBoard, boardHeight, boardWidth);
+  life::iterateBoard(gameBoard);
 
   // std::cout << "Board after iteration:" << std::endl;
   // life::printBoard(board, boardHeight, boardWidth);
@@ -144,7 +135,7 @@ TEST(LifeGameTests, IterateBoard) {
     auto cell = expected_gen2_template.begin();
     for (int y = 0; y < boardHeight; y++) {
       for (int x = 0; x < boardWidth; x++) {
-        life::setCellState(expected_gen2, boardHeight, boardWidth, x, y, *cell);
+        life::setCellState(expected_gen2, x, y, *cell);
         cell++;
       }
     }

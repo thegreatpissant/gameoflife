@@ -15,37 +15,37 @@ GameBoard genBoard(int height, int width) {
   return gameBoard;
 }
 
-char getCellState(const GameBoard &gameBoard, int height, const int width, const int x,
+char getCellState(const GameBoard &gameBoard, const int x,
                   const int y) {
-  return gameBoard.board[y * width + x] & 0x01;
+  return gameBoard.board[y * gameBoard.width + x] & 0x01;
 }
 
-void setCellState(GameBoard &gameBoard, int height, const int width, const int x,
+void setCellState(GameBoard &gameBoard, const int x,
                   const int y, char state) {
   const int start_x = std::max(0, x - 1);
   const int start_y = std::max(0, y - 1);
-  const int end_x = std::min(width, x + 2);
-  const int end_y = std::min(height, y + 2);
+  const int end_x = std::min(gameBoard.width, x + 2);
+  const int end_y = std::min(gameBoard.height, y + 2);
   int count = 0;
   for (int i = start_x; i < end_x; i++) {
     for (int j = start_y; j < end_y; j++) {
       if (i == x && j == y) {
-        gameBoard.board[j * width + i] = gameBoard.board[j * width + i] | state;
+        gameBoard.board[j * gameBoard.width + i] = gameBoard.board[j * gameBoard.width + i] | state;
       } else {
-        gameBoard.board[j * width + i] =
-            (((gameBoard.board[j * width + i] >> 1) + state) << 1) |
-            (gameBoard.board[j * width + i] & 0x01);
+        gameBoard.board[j * gameBoard.width + i] =
+            (((gameBoard.board[j * gameBoard.width + i] >> 1) + state) << 1) |
+            (gameBoard.board[j * gameBoard.width + i] & 0x01);
       }
     }
   }
 }
 
-int neighborCount(const GameBoard &gameBoard, const int height, const int width,
+int neighborCount(const GameBoard &gameBoard, 
                       const int x, const int y) {
-  return gameBoard.board[y * width + x] >> 1;
+  return gameBoard.board[y * gameBoard.width + x] >> 1;
 }
 
-void iterateBoard(GameBoard &gameBoard, int height, int width) {
+void iterateBoard(GameBoard &gameBoard) {
   /*
       Any live cell with fewer than two live neighbours dies, as if by
      underpopulation. Any live cell with two or three live neighbours lives on
@@ -55,20 +55,20 @@ void iterateBoard(GameBoard &gameBoard, int height, int width) {
   */
 
   GameBoard newGameBoard = genBoard(gameBoard.height, gameBoard.width);
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
-      int count = neighborCount(gameBoard, height, width, j, i);
-      int cellState = getCellState(gameBoard, height, width, j, i);
+  for (int i = 0; i < gameBoard.height; i++) {
+    for (int j = 0; j < gameBoard.width; j++) {
+      int count = neighborCount(gameBoard,j, i);
+      int cellState = getCellState(gameBoard, j, i);
       if (cellState == life::ALIVE) {
         if (count < 2 || count > 3) {
-          setCellState(newGameBoard, height, width, j, i, life::DEAD);
+          setCellState(newGameBoard, j, i, life::DEAD);
         } else {
-          setCellState(newGameBoard, height, width, j, i, life::ALIVE);
+          setCellState(newGameBoard, j, i, life::ALIVE);
           newGameBoard.aliveList.push_back(std::make_pair(j, i));
         }
       } else {
         if (count == 3) {
-          setCellState(newGameBoard, height, width, j, i, life::ALIVE);
+          setCellState(newGameBoard, j, i, life::ALIVE);
           newGameBoard.aliveList.push_back(std::make_pair(j, i));
         }
       }
@@ -78,16 +78,16 @@ void iterateBoard(GameBoard &gameBoard, int height, int width) {
   gameBoard.aliveList = std::move(newGameBoard.aliveList);
 }
 
-void printBoard(GameBoard gameBoard, int height, int width) {
+void printBoard(GameBoard gameBoard) {
   std::cout << "  ";
-  for (int i = 0; i < width; i++) {
+  for (int i = 0; i < gameBoard.width; i++) {
     std::cout << i << " ";
   }
   std::cout << std::endl;
-  for (int i = 0; i < height; i++) {
+  for (int i = 0; i < gameBoard.height; i++) {
     std::cout << i << " ";
-    for (int j = 0; j < width; j++) {
-      std::cout << gameBoard.board[i * width + j] << " ";
+    for (int j = 0; j < gameBoard.width; j++) {
+      std::cout << gameBoard.board[i * gameBoard.width + j] << " ";
     }
     std::cout << std::endl;
   }
