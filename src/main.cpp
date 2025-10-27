@@ -137,11 +137,11 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     appState->mouse.down = true;
     appState->mouse.clickX = event->button.x;
     appState->mouse.clickY = event->button.y;
-    appState->simulationPaused = true;
+    // appState->simulationPaused = true;
   }
   if (event->type == SDL_EVENT_MOUSE_BUTTON_UP) {
     appState->mouse.down = false;
-    appState->simulationPaused = false;
+    // appState->simulationPaused = false;
   }
   if (event->type = SDL_EVENT_MOUSE_MOTION) {
     appState->mouse.x = event->button.x;
