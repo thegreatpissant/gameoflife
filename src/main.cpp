@@ -11,7 +11,7 @@
 
 #define INITIAL_BOARD_WIDTH 500
 #define INITIAL_BOARD_HEIGHT 500
-life::Board board;
+life::GameBoard gameBoard;
 
 typedef struct {
   SDL_Window *window{};
@@ -51,7 +51,7 @@ void zapBoard(AppState *appState){
   for (int y = 0; y < appState->boardHeight; y++) {
     for (int x = 0; x < appState->boardWidth; x++) {
       if (rand() % 2) {
-        life::setCellState(board, appState->boardHeight, appState->boardWidth,
+        life::setCellState(gameBoard, appState->boardHeight, appState->boardWidth,
                            x, y, life::ALIVE);
       }
     }
@@ -80,7 +80,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
 
   setVSync(appState);
 
-  board = life::genBoard(appState->boardHeight, appState->boardWidth);
+  gameBoard = life::genBoard(appState->boardHeight, appState->boardWidth);
   appState->lastTime = SDL_GetTicks();
 
   SDL_Log("App initialized");
@@ -140,7 +140,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
               << "clickY:" << appState->mouse.clickY << std::endl;
     std::cout << "x: " << appState->mouse.x << "y:" << appState->mouse.y
               << std::endl;
-    life::setCellState(board, appState->boardHeight, appState->boardWidth,
+    life::setCellState(gameBoard, appState->boardHeight, appState->boardWidth,
                        appState->mouse.x / cellWidth,
                        appState->mouse.y / cellHeight, life::ALIVE);
   }
@@ -179,7 +179,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   /* Progress the board forward one step. */
   appStats->start(life::ITERATE, SDL_GetTicks());
   if (!appState->simulationPaused) {
-    life::iterateBoard(board, appState->boardHeight, appState->boardWidth);
+    life::iterateBoard(gameBoard, appState->boardHeight, appState->boardWidth);
   }
   appStats->stop(life::ITERATE, SDL_GetTicks());
 
@@ -192,7 +192,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   int cellHeight = WINDOW_HEIGHT / appState->boardHeight;
   for (int y = 0; y < appState->boardHeight; y++) {
     for (int x = 0; x < appState->boardWidth; x++) {
-      if (life::getCellState(board, appState->boardHeight, appState->boardWidth,
+      if (life::getCellState(gameBoard, appState->boardHeight, appState->boardWidth,
                              x, y) == life::ALIVE) {
         if (!renderCell(appState->renderer, cellWidth, x * cellWidth,
                         y * cellWidth)) {

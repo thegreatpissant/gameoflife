@@ -9,12 +9,20 @@ constexpr char DEAD = 0;
 constexpr char ALIVE = 1;
 
 using Board = std::vector<char>;
+using AliveList = std::vector<std::pair<int, int>>;
 
-Board genBoard(int height = LIFE_BOARD_HEIGHT, int width = LIFE_BOARD_WIDTH);
-int neighborCount(const Board &, int height, int width, int x, int y);
-char getCellState(const Board &board, int height, int width, int x, int y);
-void setCellState(Board &board, int height, int width, int x, int y,
+struct GameBoard {
+    Board board;
+    int height;
+    int width;
+    AliveList aliveList;
+};
+
+GameBoard genBoard(int height=LIFE_BOARD_HEIGHT, int width=LIFE_BOARD_WIDTH);
+int neighborCount(const GameBoard &, int height, int width, int x, int y);
+char getCellState(const GameBoard &board, int height, int width, int x, int y);
+void setCellState(GameBoard &board, int height, int width, int x, int y,
                   char state);
-void iterateBoard(Board &board, int height, int width);
-void printBoard(Board board, int height, int width);
+void iterateBoard(GameBoard &board, int height, int width);
+void printBoard(GameBoard board, int height, int width);
 } // namespace life
