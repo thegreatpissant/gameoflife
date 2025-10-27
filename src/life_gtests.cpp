@@ -25,6 +25,7 @@ life::setCellState(gameBoard, 0, 0,
                    life::ALIVE);
 int count = life::neighborCount(gameBoard,1, 1);
 EXPECT_EQ(1, count);
+EXPECT_EQ(1, gameBoard.aliveList.size());
 }
 
 TEST(LifeGameTests, MultiNeighborCount) {
@@ -39,6 +40,8 @@ TEST(LifeGameTests, MultiNeighborCount) {
   // (0,1).
   const int count = life::neighborCount(gameBoard, 0, 0);
   EXPECT_EQ(2, count);
+  EXPECT_EQ(3, gameBoard.aliveList.size());
+
 }
 
 TEST(LifeGameTests, GetCellState) {
@@ -143,6 +146,8 @@ TEST(LifeGameTests, IterateBoard) {
 
   // Gtest can compare vectors directly
   EXPECT_EQ(gameBoard.board, expected_gen2.board);
+
+  EXPECT_EQ(6, gameBoard.aliveList.size());
 }
 
 // Main function to run all tests

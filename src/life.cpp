@@ -38,6 +38,9 @@ void setCellState(GameBoard &gameBoard, const int x,
       }
     }
   }
+  if (state == life::ALIVE) {
+    gameBoard.aliveList.push_back(std::make_pair(x, y));
+  }
 }
 
 int neighborCount(const GameBoard &gameBoard, 
@@ -64,12 +67,10 @@ void iterateBoard(GameBoard &gameBoard) {
           setCellState(newGameBoard, j, i, life::DEAD);
         } else {
           setCellState(newGameBoard, j, i, life::ALIVE);
-          newGameBoard.aliveList.push_back(std::make_pair(j, i));
         }
       } else {
         if (count == 3) {
           setCellState(newGameBoard, j, i, life::ALIVE);
-          newGameBoard.aliveList.push_back(std::make_pair(j, i));
         }
       }
     }
