@@ -32,7 +32,7 @@ typedef struct {
   int boardWidth = INITIAL_BOARD_WIDTH;
   int boardHeight = INITIAL_BOARD_HEIGHT;
   bool vsyncState = true;
-  bool rederAliveList = false;
+  bool renderAliveList = true;
 } AppState;
 
 bool setVSync(AppState *appState) {
@@ -113,7 +113,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
       return SDL_APP_SUCCESS;
     }
     if (event->key.scancode == SDL_SCANCODE_A) {
-      appState->rederAliveList = !appState->rederAliveList;
+      appState->renderAliveList = !appState->renderAliveList;
     }
     if (event->key.scancode == SDL_SCANCODE_V) {
       appState->vsyncState = !appState->vsyncState;
@@ -206,7 +206,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   SDL_SetRenderDrawColor(appState->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
   int cellWidth = WINDOW_WIDTH / appState->boardWidth;
   int cellHeight = WINDOW_HEIGHT / appState->boardHeight;
-  if (appState->rederAliveList) {
+  if (appState->renderAliveList) {
     for (auto &cell : gameBoard.aliveList) {
       if (!renderCell(appState->renderer, cellWidth, cell.first * cellWidth,
                       cell.second * cellWidth)) {
